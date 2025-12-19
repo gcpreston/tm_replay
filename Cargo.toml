@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 slp_parser = { git = "https://github.com/AlexanderHarrison/slp_parser.git" }
+web-time = "1.1.0"
