@@ -1135,11 +1135,12 @@ pub fn construct_tm_replay_from_replay_buffer(
 
     let ident = "GTME01";
 
-    use std::time::SystemTime;
-    let rand = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .unwrap()
-        .as_nanos() as usize & 0xFFFFFFFF;
+    // use std::time::SystemTime;
+    // let rand = SystemTime::now()
+    //     .duration_since(SystemTime::UNIX_EPOCH)
+    //     .unwrap()
+    //     .as_nanos() as usize & 0xFFFFFFFF;
+    let rand: usize = 0;
 
     bytes[0..6].copy_from_slice(ident.as_bytes());
     let gci_inner_name = format!(
