@@ -84,7 +84,7 @@ impl RecordingTime {
         let mut year = 1970;
         let mut days_in_year;
         loop {
-            days_in_year = 
+            days_in_year =
                 if year % 400 == 0 { 366 }
                 else if year % 100 == 0 { 365 }
                 else if year % 4 == 0 { 366 }
@@ -157,7 +157,7 @@ pub fn valid_filename_char(c: char) -> bool {
 /// It's not necessary to name the recordings like this - any name will work.
 pub fn dolphin_gci_filename(time: RecordingTime) -> String {
     format!(
-        "01-GTME-TMREC_{:02}{:02}{:04}_{:02}{:02}{:02}.gci", 
+        "01-GTME-TMREC_{:02}{:02}{:04}_{:02}{:02}{:02}.gci",
         time.month, time.day, time.year,
         time.hour, time.minute, time.second,
     )
@@ -233,7 +233,7 @@ impl RecordingState {
         b.extend_from_slice(&[0u8; 1]); // 1 byte padding
         b.extend_from_slice(&[0u8; 12]); // 3 offsets
     }
-    
+
     fn write_menu_settings(&self, b: &mut Vec<u8>) {
         b.extend_from_slice(&[
             self.menu_settings.hmn_mode as u8,
@@ -302,7 +302,7 @@ pub struct CharacterState {
 
     /// number of consecutive frames offscreen. Counts to 60 then the player takes damage.
     pub offscreen_damage_timer: u32,
-    
+
     pub intang_ledge: u32,
     pub intang_respawn: u32,
 
@@ -322,10 +322,10 @@ pub struct CharacterState {
     /// - During turn: set to -1.0 if turning left or 1.0 if turning right
     pub char_state_var: [u8; 72],
 
-    /// State flags. 
+    /// State flags.
     pub subaction_flags: [u8; 16],
 
-    /// State flags. 
+    /// State flags.
     /// See https://github.com/project-slippi/slippi-wiki/blob/master/SPEC.md#state-bit-flags-1 for more information.
     pub state_flags: [u8; 5],
 
@@ -827,11 +827,11 @@ fn calculate_checksum(src: &[u8], result: &mut [u8]) {
     let mut checksum: [u8; 16] = [
         0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF, 0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10
     ];
-        
+
     for i in 0..src.len() {
         checksum[i % 16] = checksum[i % 16].wrapping_add(src[i]);
     }
-        
+
     for i in 1..16 {
         if checksum[i-1] == checksum[i] {
             checksum[i] ^= 0xFF;
@@ -1067,7 +1067,7 @@ fn decode_block(src: &mut [u8]) -> i32 {
             return -1;
         }
     }
-        
+
     return 0;
 }
 
@@ -1108,8 +1108,8 @@ pub fn overwrite_recsave(replay_buffer: &mut Vec<u8>, recording_save: &mut Vec<u
     // compress
     replay_buffer.resize(recording_offset + RECORDING_SIZE, 0u8);
     let recording_compressed_size = compress::lz77_compress(
-        &recording_save, 
-        RECORDING_SIZE as u32, 
+        &recording_save,
+        RECORDING_SIZE as u32,
         &mut replay_buffer[recording_offset..]
     ) as usize;
     replay_buffer.resize(recording_offset+recording_compressed_size, 0u8);
@@ -1172,7 +1172,7 @@ pub fn construct_tm_replay_from_replay_buffer(
 
     let mut block_header = WEIRD_BLOCK_HEADER;
     block_header[5..7].copy_from_slice(&(replay_buffer.len() as u16).to_be_bytes()); // write size
-    
+
     bytes.resize(bytes.len() + 16, 0); // space for checksum
     bytes.extend_from_slice(&block_header);
     bytes.extend_from_slice(&replay_buffer[0..(400 - 32)]);
@@ -1207,12 +1207,12 @@ pub fn construct_tm_replay_from_replay_buffer(
 /// Construct TM replay from initial state and inputs.
 /// See `construct_tm_replay_from_slp` for more details.
 pub fn construct_tm_replay(
-    state: &RecordingState, 
+    state: &RecordingState,
     inputs: &InputRecordings,
     flags: ReplayFlags,
 ) -> Result<Vec<u8>, ReplayCreationError> {
-    if state.cpu_state.character.character() == slp_parser::Character::Zelda { 
-        return Err(ReplayCreationError::ZeldaOnCpu) 
+    if state.cpu_state.character.character() == slp_parser::Character::Zelda {
+        return Err(ReplayCreationError::ZeldaOnCpu)
     }
 
     //if let slp_parser::ActionState::Special(_) = state.hmn_state.state {
@@ -1262,7 +1262,7 @@ pub fn construct_tm_replay(
         let stale_offset = 8972;
 
         write_ft_save_state_data(ft_state, st);
-        if let Some(follower_st) = follower { 
+        if let Some(follower_st) = follower {
             write_ft_save_state_data(&mut ft_state[ft_savestate_data_size..], follower_st);
         }
 
@@ -1288,7 +1288,7 @@ pub fn construct_tm_replay(
         ft_state[playerblock_offset..][4..8].copy_from_slice(&(character as u32).to_be_bytes());
         ft_state[playerblock_offset..][68] = costume;
     }
-    
+
     fn write_ft_save_state_data(ft_state: &mut [u8], st: &CharacterState) {
         // nested struct offsets
         let phys_offset = 40;
@@ -1324,7 +1324,7 @@ pub fn construct_tm_replay(
         ft_state[state_offset..][32..36].copy_from_slice(&(st.x_rotn_rot[3]).to_be_bytes());
 
         // phys struct -------------------------
-        
+
         // velocities
         ft_state[phys_offset..][0..4].copy_from_slice(&st.anim_velocity[0].to_be_bytes()); // anim_vel.x
         ft_state[phys_offset..][4..8].copy_from_slice(&st.anim_velocity[1].to_be_bytes()); // anim_vel.y
@@ -1351,7 +1351,7 @@ pub fn construct_tm_replay(
         ft_state[phys_offset..][92..96].copy_from_slice(&(0.0f32).to_be_bytes()); // pos_delta.z
 
         ft_state[phys_offset..][108..112].copy_from_slice(&(st.airborne as u32).to_be_bytes());
-        
+
         // input struct -----------------
 
         ft_state[input_offset..][0..4].copy_from_slice(&st.stick[0].to_be_bytes());
@@ -1366,41 +1366,41 @@ pub fn construct_tm_replay(
         ft_state[input_offset..][64..68].copy_from_slice(&(st.prev_held as u32).to_be_bytes());
         ft_state[input_offset..][72..76].copy_from_slice(&((st.prev_held & st.held) as u32).to_be_bytes());
 
-        ft_state[input_offset..][0x50] = st.input_timers.timer_lstick_tilt_x;            
-        ft_state[input_offset..][0x51] = st.input_timers.timer_lstick_tilt_y;            
-        ft_state[input_offset..][0x52] = st.input_timers.timer_trigger_analog;           
-        ft_state[input_offset..][0x53] = st.input_timers.timer_lstick_smash_x;           
-        ft_state[input_offset..][0x54] = st.input_timers.timer_lstick_smash_y;           
-        ft_state[input_offset..][0x55] = st.input_timers.timer_trigger_digital;          
-        ft_state[input_offset..][0x56] = st.input_timers.timer_lstick_any_x;             
-        ft_state[input_offset..][0x57] = st.input_timers.timer_lstick_any_y;             
-        ft_state[input_offset..][0x58] = st.input_timers.timer_trigger_any;              
-        ft_state[input_offset..][0x59] = st.input_timers.x679_x;                         
-        ft_state[input_offset..][0x5A] = st.input_timers.x67A_y;                         
-        ft_state[input_offset..][0x5B] = st.input_timers.x67B;                           
-        ft_state[input_offset..][0x5C] = st.input_timers.timer_a;                        
-        ft_state[input_offset..][0x5D] = st.input_timers.timer_b;                        
-        ft_state[input_offset..][0x5E] = st.input_timers.timer_xy;                       
+        ft_state[input_offset..][0x50] = st.input_timers.timer_lstick_tilt_x;
+        ft_state[input_offset..][0x51] = st.input_timers.timer_lstick_tilt_y;
+        ft_state[input_offset..][0x52] = st.input_timers.timer_trigger_analog;
+        ft_state[input_offset..][0x53] = st.input_timers.timer_lstick_smash_x;
+        ft_state[input_offset..][0x54] = st.input_timers.timer_lstick_smash_y;
+        ft_state[input_offset..][0x55] = st.input_timers.timer_trigger_digital;
+        ft_state[input_offset..][0x56] = st.input_timers.timer_lstick_any_x;
+        ft_state[input_offset..][0x57] = st.input_timers.timer_lstick_any_y;
+        ft_state[input_offset..][0x58] = st.input_timers.timer_trigger_any;
+        ft_state[input_offset..][0x59] = st.input_timers.x679_x;
+        ft_state[input_offset..][0x5A] = st.input_timers.x67A_y;
+        ft_state[input_offset..][0x5B] = st.input_timers.x67B;
+        ft_state[input_offset..][0x5C] = st.input_timers.timer_a;
+        ft_state[input_offset..][0x5D] = st.input_timers.timer_b;
+        ft_state[input_offset..][0x5E] = st.input_timers.timer_xy;
         ft_state[input_offset..][0x5F] = st.input_timers.timer_trigger_any_ignore_hitlag;
-        ft_state[input_offset..][0x60] = st.input_timers.timer_LR;                       
-        ft_state[input_offset..][0x61] = st.input_timers.timer_padup;                    
-        ft_state[input_offset..][0x62] = st.input_timers.timer_paddown;                  
-        ft_state[input_offset..][0x63] = st.input_timers.timer_item_release;             
-        ft_state[input_offset..][0x64] = st.input_timers.since_rapid_lr;                 
-        ft_state[input_offset..][0x65] = st.input_timers.timer_jump;                     
-        ft_state[input_offset..][0x66] = st.input_timers.timer_specialhi;                
-        ft_state[input_offset..][0x67] = st.input_timers.timer_speciallw;                
-        ft_state[input_offset..][0x68] = st.input_timers.timer_specials;                 
-        ft_state[input_offset..][0x69] = st.input_timers.timer_specialn;                 
-        ft_state[input_offset..][0x6A] = st.input_timers.timer_jump_lockout;             
-        ft_state[input_offset..][0x6B] = st.input_timers.timer_specialhi_lockout;        
+        ft_state[input_offset..][0x60] = st.input_timers.timer_LR;
+        ft_state[input_offset..][0x61] = st.input_timers.timer_padup;
+        ft_state[input_offset..][0x62] = st.input_timers.timer_paddown;
+        ft_state[input_offset..][0x63] = st.input_timers.timer_item_release;
+        ft_state[input_offset..][0x64] = st.input_timers.since_rapid_lr;
+        ft_state[input_offset..][0x65] = st.input_timers.timer_jump;
+        ft_state[input_offset..][0x66] = st.input_timers.timer_specialhi;
+        ft_state[input_offset..][0x67] = st.input_timers.timer_speciallw;
+        ft_state[input_offset..][0x68] = st.input_timers.timer_specials;
+        ft_state[input_offset..][0x69] = st.input_timers.timer_specialn;
+        ft_state[input_offset..][0x6A] = st.input_timers.timer_jump_lockout;
+        ft_state[input_offset..][0x6B] = st.input_timers.timer_specialhi_lockout;
 
         let percent_bytes = (st.percent*0.5).to_be_bytes(); // percent is stored halved for some reason???
         ft_state[dmg_offset..][4..8].copy_from_slice(&percent_bytes); // percent
         ft_state[dmg_offset..][12..16].copy_from_slice(&percent_bytes); // temp percent???
         ft_state[dmg_offset..][0x80..0x84].copy_from_slice(&st.frames_since_hit.to_be_bytes()); // frames in knockback
         ft_state[dmg_offset..][0xE4..0xE8].copy_from_slice(&st.offscreen_damage_timer.to_be_bytes());
-        
+
         // collision data (CollData) ------------------
 
         // I believe these set the centre of the ECB.
@@ -1420,7 +1420,7 @@ pub fn construct_tm_replay(
         ft_state[collision_offset..][40..44].copy_from_slice(&st.position[0].to_be_bytes());
         ft_state[collision_offset..][44..48].copy_from_slice(&st.position[1].to_be_bytes());
         ft_state[collision_offset..][48..52].copy_from_slice(&st.position[2].to_be_bytes());
-        
+
         let internal_kind = st.character.character().to_u8_internal() as usize;
         let (cliffgrab_width, cliffgrab_y_offset, cliffgrab_height) = char_data::CLIFFGRAB[internal_kind];
         ft_state[collision_offset..][0x54..][..4].copy_from_slice(&cliffgrab_width.to_be_bytes());
@@ -1439,11 +1439,11 @@ pub fn construct_tm_replay(
             };
             ft_state[collision_offset..][0xB0..][..4].copy_from_slice(&ecb_bottom.to_be_bytes());
         }
-        
+
         ft_state[collision_offset..][0x14c..][..4].copy_from_slice(&st.last_ground_idx.to_be_bytes());
 
         // camera data (CameraBox) -------------------------------------
-        
+
         ft_state[camera_box_offset..][0..4].copy_from_slice(&[0u8; 4]); // alloc
         ft_state[camera_box_offset..][4..8].copy_from_slice(&[0u8; 4]); // next box ptr
         // cam pos
@@ -1478,7 +1478,7 @@ pub fn construct_tm_replay(
         ft_state[flags_offset..][12] = st.state_flags[3];
         ft_state[flags_offset..][15] = st.state_flags[4];
 
-        ft_state[flags_offset..][24] &= !1;         
+        ft_state[flags_offset..][24] &= !1;
         ft_state[flags_offset..][24] |= match st.last_lstick_x_direction {
             slp_parser::Direction::Left => 0,
             slp_parser::Direction::Right => 1,
@@ -1486,14 +1486,14 @@ pub fn construct_tm_replay(
 
         // multijump flag
         if matches!(
-            st.character.character(), 
+            st.character.character(),
             slp_parser::Character::Jigglypuff | slp_parser::Character::Kirby
         ) {
             ft_state[flags_offset..][18] |= 0x40;
         } else {
             ft_state[flags_offset..][18] &= !0x40;
         }
-        
+
         // cargo throw flag ?
         if st.character.character() == slp_parser::Character::DonkeyKong {
             ft_state[flags_offset..][18] |= 0x80;
@@ -1504,7 +1504,7 @@ pub fn construct_tm_replay(
         // walljump flag
         if matches!(
             st.character.character(),
-            slp_parser::Character::Mario 
+            slp_parser::Character::Mario
             | slp_parser::Character::CaptainFalcon
             | slp_parser::Character::Falco
             | slp_parser::Character::Fox
@@ -1528,22 +1528,22 @@ pub fn construct_tm_replay(
         let (grab_release_x, grab_release_y) = char_data::GRAB_RELEASE_POS[internal_kind];
         ft_state[grab_offset..][0x28..][..4].copy_from_slice(&grab_release_x.to_be_bytes());
         ft_state[grab_offset..][0x2C..][..4].copy_from_slice(&grab_release_y.to_be_bytes());
-        
+
         // struct jump ----------------------------------------
 
         ft_state[jump_offset..][0] = jump_count(st.character.character())- st.jumps_remaining;
-        
+
         // struct smash ----------------------------------------
-        
+
         ft_state[smash_offset..][0..][..4].copy_from_slice(&(st.smash_attack.state as u32).to_be_bytes());
         ft_state[smash_offset..][4..][..4].copy_from_slice(&st.smash_attack.held_frames.to_be_bytes());
         ft_state[smash_offset..][8..][..4].copy_from_slice(&(60f32).to_be_bytes());
         ft_state[smash_offset..][12..][..4].copy_from_slice(&(1.367f32).to_be_bytes());
         ft_state[smash_offset..][16..][..4].copy_from_slice(&(1.0f32).to_be_bytes());
         ft_state[smash_offset..][36..][..4].copy_from_slice(&(1.0f32).to_be_bytes());
-        
+
         // struct hurt ----------------------------------------
-        
+
         let kind = if st.intang_ledge != 0 {
             2u32
         } else if st.intang_respawn != 0 {
@@ -1551,11 +1551,11 @@ pub fn construct_tm_replay(
         } else {
             0u32
         };
-        
+
         ft_state[hurt_offset..][4..][..4].copy_from_slice(&kind.to_be_bytes());
         ft_state[hurt_offset..][8..][..4].copy_from_slice(&st.intang_ledge.to_be_bytes());
         ft_state[hurt_offset..][12..][..4].copy_from_slice(&st.intang_respawn.to_be_bytes());
-        
+
         // callbacks (struct cb) ------------------------------
 
         let fns_idx = (st.state.as_u16() as usize) * 0x20;
@@ -1591,8 +1591,8 @@ pub fn construct_tm_replay(
     // write inputs
 
     fn write_inputs(slot: &mut [u8], start_frame: i32, inputs: Option<&[Input]>) -> Result<(), ReplayCreationError> {
-        if let Some(i) = inputs { 
-            if i.len() > 3600 { return Err(ReplayCreationError::DurationTooLong) } 
+        if let Some(i) = inputs {
+            if i.len() > 3600 { return Err(ReplayCreationError::DurationTooLong) }
         }
 
         // if None or len == 0
@@ -1641,8 +1641,8 @@ pub fn construct_tm_replay(
     // compress
     bytes.resize(recording_offset + RECORDING_SIZE, 0u8);
     let recording_compressed_size = compress::lz77_compress(
-        &recording_save, 
-        RECORDING_SIZE as u32, 
+        &recording_save,
+        RECORDING_SIZE as u32,
         &mut bytes[recording_offset..]
     ) as usize;
     bytes.resize(recording_offset+recording_compressed_size, 0u8);
@@ -1686,7 +1686,7 @@ pub mod replay_flags {
 /// - If either character is in a special action state (will be supported in the future)
 /// - If Zelda is on cpu. This is due to a bug in Unclepunch.
 pub fn construct_tm_replay_from_slp(
-    game: &slp_parser::Game, 
+    game: &slp_parser::Game,
     human: HumanPort,
     frame: usize,
     duration: usize,
@@ -1698,7 +1698,7 @@ pub fn construct_tm_replay_from_slp(
     if major < MIN_VERSION_MAJOR || (major == MIN_VERSION_MAJOR && minor < MIN_VERSION_MINOR) {
         return Err(ReplayCreationError::OutdatedReplay);
     }
-    
+
     let mut frame = frame;
     let mut duration = duration;
 
@@ -1732,7 +1732,7 @@ pub fn construct_tm_replay_from_slp(
 
         if matches!(f.state, ActionState::Standard(
             CatchPull | CatchDashPull | CatchWait | CatchAttack | CatchCut
-                | ThrowF | ThrowB | ThrowHi | ThrowLw 
+                | ThrowF | ThrowB | ThrowHi | ThrowLw
                 | CapturePulledHi | CaptureWaitHi | CaptureDamageHi | CapturePulledLw | CaptureWaitLw
                 | CaptureDamageLw | CaptureCut | CaptureJump | CaptureNeck | CaptureFoot
                 | ThrownF | ThrownB | ThrownHi | ThrownLw | ThrownLwWomen
@@ -1750,15 +1750,15 @@ pub fn construct_tm_replay_from_slp(
         )) {
             return false;
         }
-        
+
         let state_num = f.state.as_u16() as usize;
         if hitboxes::ATTACK_RANGE_START <= state_num && state_num < hitboxes::ATTACK_RANGE_END {
             let hitbox_range = &hitboxes::ATTACK_HITBOXES[f.character as usize][state_num - hitboxes::ATTACK_RANGE_START];
             if hitbox_range.contains(&(f.anim_frame as u32)) {
                 return false;
             }
-        } 
-        
+        }
+
         true
     }
 
@@ -1770,12 +1770,12 @@ pub fn construct_tm_replay_from_slp(
 
     // We need to search forwards for entry
     while matches!(
-        low_port_frames[frame].state, 
+        low_port_frames[frame].state,
         slp_parser::ActionState::Standard(slp_parser::StandardActionState::Entry
             | slp_parser::StandardActionState::EntryStart
             | slp_parser::StandardActionState::EntryEnd)
     ) || matches!(
-        high_port_frames[frame].state, 
+        high_port_frames[frame].state,
         slp_parser::ActionState::Standard(slp_parser::StandardActionState::Entry
             | slp_parser::StandardActionState::EntryStart
             | slp_parser::StandardActionState::EntryEnd)
@@ -1812,7 +1812,7 @@ pub fn construct_tm_replay_from_slp(
                     trigger: (f.analog_trigger_value * 140.0) as u8,
                 }
             }).collect();
-        
+
         // characters will start moving on frame 84
         if frame_i < 83 {
             for i in 0..(83 - frame_i) {
@@ -1820,12 +1820,12 @@ pub fn construct_tm_replay_from_slp(
                 inputs[i] = Input::NONE;
             }
         }
-        
+
         inputs
     }
 
     fn state(
-        starting_char: slp_parser::CharacterColour, 
+        starting_char: slp_parser::CharacterColour,
         frames: &[slp_parser::Frame],
         opponent_frames: &[slp_parser::Frame],
         frame_idx: usize,
@@ -1932,7 +1932,7 @@ pub fn construct_tm_replay_from_slp(
             )) => {
                 if frame.anim_frame >= 10.0 { subaction_flags[3] = 1; }
             }
-            
+
             slp_parser::ActionState::Special(
                 slp_parser::SpecialActionState::Jigglypuff(
                     slp_parser::SpecialActionStateJigglypuff::Jump2
@@ -1978,7 +1978,7 @@ pub fn construct_tm_replay_from_slp(
             }
             _ => (),
         }
-        
+
         if starting_char.character() == slp_parser::Character::Peach {
             let mut has_float = 1u32;
             for f in frames[..=frame_idx].iter().rev() {
@@ -2002,27 +2002,27 @@ pub fn construct_tm_replay_from_slp(
         }
 
         let frames_since_hit = match frame.state {
-            slp_parser::ActionState::Standard(slp_parser::StandardActionState::DamageHi1        
-                | slp_parser::StandardActionState::DamageHi2    
-                | slp_parser::StandardActionState::DamageHi3    
-                | slp_parser::StandardActionState::DamageN1     
-                | slp_parser::StandardActionState::DamageN2     
-                | slp_parser::StandardActionState::DamageN3     
-                | slp_parser::StandardActionState::DamageLw1    
-                | slp_parser::StandardActionState::DamageLw2    
-                | slp_parser::StandardActionState::DamageLw3    
-                | slp_parser::StandardActionState::DamageAir1   
-                | slp_parser::StandardActionState::DamageAir2   
-                | slp_parser::StandardActionState::DamageAir3   
-                | slp_parser::StandardActionState::DamageFlyHi  
-                | slp_parser::StandardActionState::DamageFlyN   
-                | slp_parser::StandardActionState::DamageFlyLw  
-                | slp_parser::StandardActionState::DamageFlyTop 
+            slp_parser::ActionState::Standard(slp_parser::StandardActionState::DamageHi1
+                | slp_parser::StandardActionState::DamageHi2
+                | slp_parser::StandardActionState::DamageHi3
+                | slp_parser::StandardActionState::DamageN1
+                | slp_parser::StandardActionState::DamageN2
+                | slp_parser::StandardActionState::DamageN3
+                | slp_parser::StandardActionState::DamageLw1
+                | slp_parser::StandardActionState::DamageLw2
+                | slp_parser::StandardActionState::DamageLw3
+                | slp_parser::StandardActionState::DamageAir1
+                | slp_parser::StandardActionState::DamageAir2
+                | slp_parser::StandardActionState::DamageAir3
+                | slp_parser::StandardActionState::DamageFlyHi
+                | slp_parser::StandardActionState::DamageFlyN
+                | slp_parser::StandardActionState::DamageFlyLw
+                | slp_parser::StandardActionState::DamageFlyTop
                 | slp_parser::StandardActionState::DamageFlyRoll)
             => frames[..frame_idx].iter().rev().position(|f| f.hitlag_frames != 0.0).unwrap() as i32,
-            _ => -1 
+            _ => -1
         };
-        
+
         // TODO pass in followers
         let stale_moves = slp_parser::compute_staled_moves(
             &frames[..=frame_idx],
@@ -2044,7 +2044,7 @@ pub fn construct_tm_replay_from_slp(
             let min_frame = frame_idx.saturating_sub(256) + 1;
             for i in min_frame..=frame_idx {
                 input_timers.advance(&frames[i], &frames[i-1]);
-                
+
                 // 80097ab8 - timer_a and timer_b are reset on missed tech
                 if frames[i].anim_frame == 0.0
                     && matches!(
@@ -2071,7 +2071,7 @@ pub fn construct_tm_replay_from_slp(
                 break;
             }
         }
-        
+
         let mut smash_attack = SmashAttack::NONE;
         if matches!(
             frames[i].state,
@@ -2091,7 +2091,7 @@ pub fn construct_tm_replay_from_slp(
                 if a.state_num != b.state_num { break; }
                 if a.anim_frame == b.anim_frame { smash_attack.held_frames += 1.0; }
             }
-            
+
             if i != 0 {
                 let a = &frames[i-1];
                 let b = &frames[i];
@@ -2101,7 +2101,7 @@ pub fn construct_tm_replay_from_slp(
                     smash_attack.state = SmashAttackState::Release;
                 }
             }
-            
+
             // We need to special case the first charge frame.
             // It's kinda weird.
             if i+1 < frames.len() {
@@ -2113,7 +2113,7 @@ pub fn construct_tm_replay_from_slp(
                 }
             }
         }
-        
+
         let mut intang_ledge = 0;
         for i in 1..31 {
             if i > frame_idx { break; }
@@ -2123,7 +2123,7 @@ pub fn construct_tm_replay_from_slp(
                 break;
             }
         }
-        
+
         let mut intang_respawn = 0;
         for i in 1..121 {
             if i > frame_idx { break; }
@@ -2137,11 +2137,11 @@ pub fn construct_tm_replay_from_slp(
                 break;
             }
         }
-        
+
         CharacterState {
             // respect zelda/sheik transformation
             character: slp_parser::CharacterColour::from_character_and_colour(
-               frame.character, 
+               frame.character,
                starting_char.costume_idx()
             ).unwrap(),
             position: [frame.position.x, frame.position.y, 0.0],
@@ -2270,7 +2270,7 @@ fn frame_from_ft_state(ft_state: &[u8], port_idx: u8) -> slp_parser::Frame {
     fn read_f32(ft_state: &[u8], offset: usize) -> f32 {
         f32::from_be_bytes(ft_state[offset..][..4].try_into().unwrap())
     }
-    
+
     fn read_u32(ft_state: &[u8], offset: usize) -> u32 {
         u32::from_be_bytes(ft_state[offset..][..4].try_into().unwrap())
     }
@@ -2280,21 +2280,21 @@ fn frame_from_ft_state(ft_state: &[u8], port_idx: u8) -> slp_parser::Frame {
     let state_offset = 4;
     let phys_offset = 40;
     let dmg_offset = 3680;
-    
+
     let character = read_u32(ft_state, playerblock_offset + 4);
     let character = slp_parser::Character::from_u8_external(character as u8).unwrap();
-        
+
     let direction_f = read_f32(ft_state, state_offset + 4);
     let direction = if direction_f == -1.0 { slp_parser::Direction::Left } else { slp_parser::Direction::Right };
-    
+
     let pos_x = read_f32(ft_state, phys_offset + 60);
     let pos_y = read_f32(ft_state, phys_offset + 64);
-    
+
     let state_num = read_u32(ft_state, state_offset + 0) as u16;
     let state = slp_parser::ActionState::from_u16(state_num, character).unwrap();
     let anim_frame = read_f32(ft_state, state_offset + 8);
     let percent = read_f32(ft_state, dmg_offset + 4) * 2.0; // percent is stored halved for some reason???
-    
+
     slp_parser::Frame {
         character,
         port_idx,
@@ -2305,7 +2305,7 @@ fn frame_from_ft_state(ft_state: &[u8], port_idx: u8) -> slp_parser::Frame {
         state_num,
         anim_frame,
         percent,
-        
+
         // Don't need to care about the rest for now
         ..slp_parser::Frame::NULL
     }
@@ -2316,7 +2316,7 @@ pub fn read_tm_replay(gci_bytes: &mut [u8]) -> Option<ReadReplayData> {
     let replay_buffer = read_replay_buffer(gci_bytes)?;
     let recording_offset = u32::from_be_bytes(replay_buffer[60..64].try_into().unwrap()) as usize;
     let menu_offset = u32::from_be_bytes(replay_buffer[64..68].try_into().unwrap()) as usize;
-    
+
     let char_hmn = slp_parser::Character::from_u8_external(replay_buffer[8])?;
     let char_cpu = slp_parser::Character::from_u8_external(replay_buffer[10])?;
     let char_hmn = slp_parser::CharacterColour::from_character_and_colour(char_hmn, replay_buffer[9])?;
@@ -2326,20 +2326,20 @@ pub fn read_tm_replay(gci_bytes: &mut [u8]) -> Option<ReadReplayData> {
     let uncompressed_size = u32::from_be_bytes(recording_compressed_save[0..4].try_into().unwrap()) as usize;
     let mut recording_save = vec![0u8; uncompressed_size + 257]; // pad a bit for compression algo
     compress::lz77_decompress(recording_compressed_save, recording_save.as_mut_slice());
-    
+
     let st_offset = 312; // savestate offset - skip MatchInit in RecordingSave
     let ft_state_offset = 8+EVENT_DATASIZE; // FtState array offset - fields in Savestate;
     let ft_state_size = 9016;
-    
-    let ft_state_hmn = &recording_save[st_offset+ft_state_offset..][..ft_state_size]; 
+
+    let ft_state_hmn = &recording_save[st_offset+ft_state_offset..][..ft_state_size];
     let ft_state_cpu = &recording_save[st_offset+ft_state_offset+ft_state_size..][..ft_state_size];
-    
+
     let hmn_frame = frame_from_ft_state(ft_state_hmn, 0);
     let cpu_frame = frame_from_ft_state(ft_state_cpu, 1);
-    
+
     let stage_external = u16::from_be_bytes(recording_save[0xE..][..2].try_into().unwrap());
     let stage = slp_parser::Stage::from_u16(stage_external)?;
-    
+
     let pseudo_game = slp_parser::Game {
         frame_count: 1,
         frames: [Some(vec![hmn_frame].into()), Some(vec![cpu_frame].into()), None, None],
@@ -2365,13 +2365,13 @@ pub fn read_tm_replay(gci_bytes: &mut [u8]) -> Option<ReadReplayData> {
         },
         notes: slp_parser::Notes::NULL,
     };
-    
+
     let mut name_bytes = [0u8; 0x21];
     name_bytes[0..0x20].copy_from_slice(&gci_bytes[0x60..][..0x20]);
     let name = std::ffi::CStr::from_bytes_until_nul(&name_bytes).ok()?
         .to_str().ok()?
         .to_string();
-    
+
     Some(ReadReplayData {
         pseudo_game,
         name,
