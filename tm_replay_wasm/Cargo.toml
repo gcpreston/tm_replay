@@ -1,0 +1,12 @@
+[package]
+name = "tm_replay_wasm"
+version = "0.1.1"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+slp_parser = { git = "https://github.com/AlexanderHarrison/slp_parser.git" }
+tm_replay = { path = "../tm_replay" }
+wasm-bindgen = "0.2.108"

@@ -1,0 +1,8 @@
+[package]
+name = "tm_replay"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+slp_parser = { git = "https://github.com/AlexanderHarrison/slp_parser.git" }
+web-time = "1.1.0"

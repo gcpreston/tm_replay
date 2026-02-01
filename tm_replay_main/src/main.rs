@@ -79,7 +79,7 @@ fn run() -> Result<(), String> {
             err => return Err(format!("Error: Unknown argument '{}'", err).into())
         }
     }
-    
+
     let file = match file {
         Some(s) => s,
         None => return Err("Error: '--slp-file' argument is required".into()),
